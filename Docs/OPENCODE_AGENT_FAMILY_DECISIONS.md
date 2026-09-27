@@ -320,6 +320,39 @@ Verified means directly observed and confirmed against the installed tooling.
   "To confirm" line that D-011 deferred to V1 for the launch question, though
   the separate inherited-agent rejection test is now moot per D-015.
 
+### D-017 - The legacy duplicate was removed by owner action, with no content lost
+
+- **Decision:** The project owner deleted the legacy duplicate at
+  `F:\OpenProperty-master\Trading` on **2026-09-27**. This closes O-010. It was
+  an owner decision, not an agent action.
+- **Attribution, stated explicitly because it matters for audit:** **no agent
+  deleted, modified, renamed, or moved either repository copy.** The Coordinator
+  issued no delete or move command at any point in the session. The removal
+  occurred outside the agent toolchain, at owner initiative, after the V0.1
+  baseline audit had identified the duplicate as the highest-ranked structural
+  risk. Every agent probe in this workstream was read-only, and the working tree
+  of `F:\Trading` was verified clean immediately after each round.
+- **Verified, no unique content was lost.** The duplicate stood at commit
+  `69e5cd9` with a tree byte-identical to `F:\Trading` at that commit. That
+  commit is fully preserved in the canonical repository and is a verified
+  ancestor of the current `HEAD`:
+  - `git cat-file -t 69e5cd9` returns `commit`, and `git ls-tree -r --name-only
+    69e5cd9` still resolves all 10 original files.
+  - `git merge-base --is-ancestor 69e5cd9 b8474ee` succeeds, so the pre-move
+    state is reachable from the current branch.
+  - `git fsck` reports no errors.
+  The canonical repository therefore holds a **strict superset** of the
+  duplicate's content, plus the V0.1 reconciliation work.
+- **Note on recoverability:** the duplicate was **never tracked** by the parent
+  repository (`git log --all -- Trading` in `F:\OpenProperty-master` returns
+  nothing), so it left no record there and is not recoverable from that
+  repository's history. This is precisely the risk O-010 warned about, and it is
+  why the loss-free verification above was performed explicitly rather than
+  assumed.
+- **Consequence:** `F:\Trading` is now the single copy of this project. The
+  divergence risk and the "dirty parent repository" exposure both disappear.
+  O-010 is closed; no open decision remains about repository duplication.
+
 
 
 ---
@@ -343,9 +376,11 @@ candidate for a later decision.
 - **To confirm:** owner decision on whether to relocate the project out of the
   OpenProperty tree entirely.
 - **Outcome (V0.1, verified):** the project was relocated to `F:\Trading`. The
-  risk named above was real: `F:\OpenProperty-master\Trading` still exists and
-  is still reported as `?? Trading/` by the parent repository. See D-015 for the
-  new root, and O-010 for the duplicate that the move left behind.
+  risk named above was real: at the time of the audit the old copy
+  `F:\OpenProperty-master\Trading` still existed and was still reported as
+  `?? Trading/` by the parent repository. It has since been removed by owner
+  action (D-017). See D-015 for the new root and D-017 for the closure of the
+  duplication.
 
 ### A-002 - `quant-researcher` needs local shell execution
 
@@ -530,34 +565,40 @@ see the linked decision), `MOOT` (the question no longer applies).
 | O-007 | Should the baseline project's `orkestrix-*` agents be retired? | **MOOT** (D-015) | - | Nothing to retire **in this project**. They still exist at `F:\OpenProperty-master\.opencode\agent\`, but they belong to that repository and no longer resolve from `F:\Trading`. |
 | O-008 | Should `Trading/` be moved out of the OpenProperty tree to remove the four inherited `orkestrix-*` agents entirely? | **RESOLVED** (D-015) | - | **Done in V0.1.** The move happened and it achieved the stated goal: `opencode debug agents` from `F:\Trading` resolves no `orkestrix-*` agent. |
 | O-009 | Should shell-capable agents run inside an OS-level sandbox or container? | OPEN | Nothing in V0 | **Partly resolved in V0.** The reliably matchable Git operations were upgraded to hard-deny `experimental.policies` (D-013), and the residual risk is now documented accurately rather than papered over (D-014). What remains is true containment: a sandbox or container so that a shell-capable agent cannot reach a `.env` file or a path outside the repository. The V2 permissions guide is explicit that command-text matching is best effort, so this cannot be solved with more patterns. Recommend deciding before V1 when the stack and execution model are known. |
-| O-010 | What should happen to the legacy duplicate at `F:\OpenProperty-master\Trading`? | **OPEN - OWNER DECISION REQUIRED** | Nothing technically | See below. **Not resolved by any agent, deliberately.** |
+| O-010 | What should happen to the legacy duplicate at `F:\OpenProperty-master\Trading`? | **RESOLVED** (D-017) | - | **Resolved by owner action on 2026-09-27.** The duplicate was deleted by the project owner. No agent deleted or modified it. See D-017. |
 
-### O-010 - Legacy duplicate repository (owner decision required)
+### O-010 - Legacy duplicate repository (RESOLVED - see D-017)
 
-- **Verified state (V0.1):** two copies of this project exist on disk.
+> **STATUS: RESOLVED by owner action on 2026-09-27.** Recorded as D-017. The
+> state described below was true when first verified and is retained as the
+> audit trail for the decision.
+
+- **Verified state (V0.1, at the time of the audit):** two copies of this
+  project existed on disk.
   - **`F:\Trading`** - the **current canonical repository**. Independent Git
     repository, no remote, branch `main`, single commit `69e5cd9`, clean working
     tree. Recorded as canonical by D-015.
-  - **`F:\OpenProperty-master\Trading`** - a **legacy duplicate pending human
-    resolution**. It is a *separate* Git repository on the *same* commit
-    `69e5cd9`, also with a clean working tree. Its index was compared against
-    `F:\Trading` and the two carry **identical blob SHAs for all 10 tracked
-    files**, so the copies are byte-equivalent today.
-- **Why this needs a human, not an agent.** The copies are equivalent now, but
-  nothing keeps them that way. The options each carry consequences that are not
-  the agent's to weigh: **retain** both and accept divergence risk; **delete**
-  the legacy copy, which is irreversible and destroys the pre-move working copy
-  of record; **archive** it by moving it somewhere neutral; or **reconcile** it
-  deliberately. `AGENTS.md` section 9 forbids history-rewriting Git operations,
-  and section 7 forbids acting outside an authorised scope. Neither copy may be
-  deleted or modified by an agent on its own initiative.
-- **Risk while unresolved:** the legacy copy sits inside an unrelated repository
-  (`F:\OpenProperty-master`, remote `https://github.com/GarrenRs/MCP`) as an
-  **untracked** directory. That parent repository already has a dirty working
-  tree, so a `git clean` or an accidental recursive operation there could
-  destroy the pre-move copy with no trace in that repository's history.
-- **Explicitly not done by V0.1:** neither copy was deleted, modified, or
-  renamed. The duplicate is **recorded, not resolved.**
+  - **`F:\OpenProperty-master\Trading`** - a **legacy duplicate**. It was a
+    *separate* Git repository on the *same* commit `69e5cd9`, also with a clean
+    working tree. Its index was compared against `F:\Trading` and the two
+    carried **identical blob SHAs for all 10 tracked files**, so the copies were
+    byte-equivalent.
+- **Why this needed a human, not an agent.** The copies were equivalent, but
+  nothing kept them that way. The options each carried consequences that were
+  not an agent's to weigh: retain both and accept divergence risk; delete the
+  legacy copy, which is irreversible; archive it somewhere neutral; or
+  reconcile it deliberately. `AGENTS.md` section 9 forbids history-rewriting Git
+  operations, and section 7 forbids acting outside an authorised scope.
+- **Risk while it was unresolved:** the legacy copy sat inside an unrelated
+  repository (`F:\OpenProperty-master`, remote `https://github.com/GarrenRs/MCP`)
+  as an **untracked** directory. That parent repository already had a dirty
+  working tree, so a `git clean` or an accidental recursive operation there
+  could have destroyed the pre-move copy with no trace in that repository's
+  history.
+- **Resolution:** the project owner deleted the legacy duplicate on 2026-09-27,
+  after being shown this risk in the V0.1 baseline audit. No agent deleted,
+  modified, renamed, or moved it. See D-017 for the verification that no unique
+  content was lost.
 
 ---
 
