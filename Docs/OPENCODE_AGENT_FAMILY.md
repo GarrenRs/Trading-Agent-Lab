@@ -4,8 +4,14 @@
 **Authority:** This document governs agent roles, model routing, permissions,
 invocation policy, workflow, and closure rules.
 **Established under:** Phase V0 (work-engine establishment).
+**Reconciled under:** Phase V0.1 (documentation reconciliation and agent runtime
+validation).
+**Repository root:** `F:\Trading` - independent Git repository, no remote. See
+`Docs/OPENCODE_AGENT_FAMILY_DECISIONS.md` decision D-015.
 **Verified against:** OpenCode `v2.0.13` (config schema OpenCode V2).
-**Coordinator model:** `Big Pickle` (main session).
+**Coordinator model:** `Big Pickle` (main session), which resolves to
+`opencode/big-pickle` on the `opencode` provider. It is the Coordinator only and
+is deliberately **not** one of the `opencode-go/*` family models.
 
 Where this document and an individual agent prompt conflict, this document
 wins. Report the conflict to the Coordinator.
@@ -60,8 +66,10 @@ No additional permanent agents are created in V0.
 
 ## 3. Model routing
 
-All models are **OpenCode Go** (`opencode-go/*`). **No free-tier model is used
-for the primary project agent family.**
+All five **family member** models are **OpenCode Go** (`opencode-go/*`). **No
+free-tier model is used for the primary project agent family.** The Coordinator
+is outside this family and runs `opencode/big-pickle` on the `opencode`
+provider; that is a deliberate exception, not an inconsistency.
 
 | Agent | Model | Tier | Rationale |
 | --- | --- | --- | --- |
@@ -86,6 +94,29 @@ Do not escalate a routine task to a stronger model without a stated reason.
 All five identifiers were confirmed present via `opencode models` on the
 installed build. **If an identifier ever becomes unavailable, stop and report
 the exact mismatch. Never substitute a different model silently.**
+
+**How to verify these identifiers (corrected in V0.1).** The *unfiltered*
+`models` listing enumerates **only the `opencode` provider**. If you rely on
+that listing alone, the `opencode-go/*` identifiers will appear to be missing
+and you may wrongly conclude the configuration is broken. Query the provider
+explicitly instead:
+
+- `opencode models` with `provider: "opencode-go"` - returns the `opencode-go`
+  catalogue, including all three of `glm-5.3-flash`, `glm-5.3`, and
+  `kimi-k2.7-code`.
+- `opencode models` with a name query such as `gpt-5.6-luna` - returns
+  `opencode-go/gpt-5.6-luna`, which has **no** `opencode`-provider equivalent
+  and is therefore easy to miss.
+
+**Runtime validation (V0.1, verified).** All five agents were launched with
+read-only probes. All five launched successfully on their configured models,
+with no substitution and no permission anomaly. Each agent separately reported
+the model identity disclosed in its own session context; **all five matched
+their frontmatter on both provider and model id**, and all five reported the
+`opencode-go` provider. The two write-capable agents completed without using
+`edit`, and the working tree was confirmed unchanged afterwards. The evidence is
+agent self-report of session context, not a server-side attestation, and is
+described with that limit in full under decision D-016 in the decision register.
 
 ---
 
@@ -189,6 +220,15 @@ is recorded as open decision O-009.
 `.opencode/opencode.jsonc` denies `subagent: *` and then re-allows exactly the
 five family members. The main session can therefore launch precisely these five
 and nothing else, including any agent inherited from a parent directory.
+
+**Current state (V0.1, verified):** no inherited agent resolves at all. From
+`F:\Trading`, `opencode debug agents` returns 12 agents and **none of them is
+one of the four `orkestrix-*` agents** defined under the old
+`F:\OpenProperty-master` tree. The allow-list described above is therefore
+defence in depth rather than the only control. Were the project ever nested
+inside another repository again, the ancestor-directory walk would resume and
+the allow-list would become load-bearing once more. See D-011 and D-015 in the
+decision register.
 
 ---
 
