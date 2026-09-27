@@ -1,0 +1,74 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  // TRADING AGENT LAB - project-level OpenCode configuration.
+  //
+  // Schema: OpenCode V2 (verified against opencode v2.0.13 and
+  // https://opencode.ai/v2/docs/config + /v2/docs/agents).
+  //
+  // Authority: Docs/OPENCODE_AGENT_FAMILY.md
+  //
+  // The Coordinator is the MAIN SESSION itself (default `build` primary
+  // agent). No competing coordinator agent is defined, per project policy.
+  //
+  // NOTE: the `instructions` field is intentionally NOT set. OpenCode V2
+  // accepts but does not load it; AGENTS.md is auto-discovered instead.
+
+  "permissions": [
+    // ---------------------------------------------------------------
+    // Coordinator subagent allow-list.
+    //
+    // Rules are ordered and the LAST matching rule wins, so the broad
+    // deny is declared first and the five project agents are re-opened
+    // individually. This is the documented OpenCode pattern.
+    //
+    // Effect: the main session may launch exactly these five subagents.
+    // Any other agent (including agents inherited from a parent
+    // directory outside this repository) is denied.
+    // ---------------------------------------------------------------
+    { "action": "subagent", "resource": "*", "effect": "deny" },
+    { "action": "subagent", "resource": "explorer", "effect": "allow" },
+    { "action": "subagent", "resource": "quant-researcher", "effect": "allow" },
+    { "action": "subagent", "resource": "builder", "effect": "allow" },
+    { "action": "subagent", "resource": "tester", "effect": "allow" },
+    { "action": "subagent", "resource": "reviewer", "effect": "allow" }
+  ],
+
+  // ---------------------------------------------------------------
+  // Hard-deny policies.
+  //
+  // Agent-level `permissions` rules are ordinary rules: the last
+  // match wins, so a broader later rule can override a narrower
+  // earlier deny. OpenCode `experimental.policies` are different -
+  // they run AFTER permission rules and saved approvals, turn
+  // `allow` or `ask` into `deny`, and can never grant access.
+  //
+  // They are used here for the operations that are (a) reliably
+  // matchable as command text and (b) unacceptable for EVERYONE,
+  // including the Coordinator: publishing to a remote, and rewriting
+  // Git history.
+  //
+  // `git commit` is deliberately ABSENT here. These policies are
+  // global and cannot be scoped per agent, and cannot be overridden
+  // by a later agent rule - so denying it here would also block the
+  // Coordinator, which is the only role allowed to commit. Committing
+  // is instead denied at AGENT level on all five subagents, which is
+  // correctly scoped and already verified.
+  //
+  // They are deliberately NOT presented as a real shell sandbox. See
+  // the "What this configuration does NOT enforce" section of
+  // Docs/OPENCODE_AGENT_FAMILY.md.
+  // ---------------------------------------------------------------
+  "experimental": {
+    "policies": [
+      { "action": "permission", "resource": "shell:git push *", "effect": "deny" },
+      { "action": "permission", "resource": "shell:git reset *", "effect": "deny" },
+      { "action": "permission", "resource": "shell:git reset*", "effect": "deny" },
+      { "action": "permission", "resource": "shell:git rebase *", "effect": "deny" },
+      { "action": "permission", "resource": "shell:git rebase*", "effect": "deny" },
+      { "action": "permission", "resource": "shell:git clean *", "effect": "deny" },
+      { "action": "permission", "resource": "shell:git clean*", "effect": "deny" },
+      { "action": "permission", "resource": "shell:git filter-branch*", "effect": "deny" }
+    ]
+  }
+}

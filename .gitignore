@@ -1,0 +1,81 @@
+# ---------------------------------------------------------------------------
+# TRADING AGENT LAB - ignore rules
+# ---------------------------------------------------------------------------
+
+# --- Secrets and credentials ------------------------------------------------
+# Never commit exchange API keys, private keys, or session tokens.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
+*.secret
+
+# --- Node / JavaScript ------------------------------------------------------
+node_modules/
+.pnpm-store/
+dist/
+build/
+out/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# --- Trading / research artifacts (generated, reproducible, not source) -----
+# Backtest output, datasets, and captured market data are large and
+# regenerable. Never commit them or any file that may embed credentials.
+data/
+datasets/
+artifacts/
+backtests/
+logs/
+*.parquet
+*.feather
+*.h5
+*.hdf5
+*.sqlite
+*.sqlite3
+*.db
+
+# --- Secrets and credentials (repeat guard for scanners) -------------------
+*.key
+*.keystore
+
+# --- OpenCode ---------------------------------------------------------------
+# Local OpenCode runtime state only. Agent definitions, commands, and
+# opencode.jsonc ARE tracked deliberately.
+.opencode/node_modules/
+.opencode/package-lock.json
+.opencode/.opencode.zip
+.opencode/*.zip
+
+# --- Editors and OS ---------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Logs and scratch -------------------------------------------------------
+*.log
+*.tmp
+scratch/
+tmp/
